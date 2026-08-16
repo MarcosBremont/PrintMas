@@ -28,7 +28,23 @@ if (!fs.existsSync(UPLOAD_DIR)) {
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+
+// El frontend vive en la raíz del repo (requisito de GitHub Pages), junto a
+// server.js y uploads/. Bloqueamos esas rutas para no servir el código fuente
+// ni los PDFs subidos por HTTP.
+const BLOCKED_STATIC_PATHS = [
+  '/server.js', '/package.json', '/package-lock.json',
+  '/scripts', '/uploads', '/node_modules', '/.git', '/.gitignore', '/.env'
+];
+app.use((req, res, next) => {
+  const blocked = BLOCKED_STATIC_PATHS.some(
+    (p) => req.path === p || req.path.startsWith(`${p}/`)
+  );
+  if (blocked) return res.status(404).end();
+  next();
+});
+
+app.use(express.static(__dirname));
 
 // ---------------------------------------------------------------------------
 // Multer: almacenamiento temporal en disco, solo PDFs
