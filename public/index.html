@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>PrintMás — Kiosko de Impresión</title>
+  <meta name="theme-color" content="#2563eb" />
+  <meta name="description" content="Kiosko autoservicio de impresión 24/7" />
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-icon">🖨️</span>
+      <span>PrintMás</span>
+    </div>
+    <div class="steps" id="stepsIndicator">
+      <div class="step active" data-step="1"><span>1</span>Archivo</div>
+      <div class="step" data-step="2"><span>2</span>Configuración</div>
+      <div class="step" data-step="3"><span>3</span>Cotización</div>
+      <div class="step" data-step="4"><span>4</span>Pago</div>
+    </div>
+  </header>
+
+  <main class="app">
+
+    <!-- PASO 1: SUBIDA DE ARCHIVO -->
+    <section class="screen active" id="screen-1">
+      <h1>Sube tu documento PDF</h1>
+      <p class="subtitle">Solo se admiten archivos en formato PDF</p>
+
+      <label class="dropzone" id="dropzone" for="fileInput">
+        <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden />
+        <div class="dropzone-icon">📄</div>
+        <div class="dropzone-text">Toca aquí para seleccionar tu PDF</div>
+        <div class="dropzone-hint">o arrastra el archivo a esta zona</div>
+      </label>
+
+      <div class="file-preview" id="filePreview" hidden>
+        <div class="file-preview-icon">✅</div>
+        <div class="file-preview-info">
+          <strong id="fileName"></strong>
+          <span id="fileMeta"></span>
+        </div>
+        <button class="btn-icon" id="removeFileBtn" aria-label="Quitar archivo">✕</button>
+      </div>
+
+      <p class="error-message" id="uploadError" hidden></p>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="toStep2Btn" disabled>Continuar</button>
+      </div>
+    </section>
+
+    <!-- PASO 2: CONFIGURACIÓN DE IMPRESIÓN -->
+    <section class="screen" id="screen-2">
+      <h1>Configura tu impresión</h1>
+      <p class="subtitle" id="pageCountLabel">Tu documento tiene <strong>0</strong> páginas</p>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Páginas a imprimir</label>
+          <div class="radio-group">
+            <label class="radio-pill">
+              <input type="radio" name="pageMode" value="all" checked />
+              Todas
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="pageMode" value="range" />
+              Rango específico
+            </label>
+          </div>
+          <input type="text" id="pageRangeInput" placeholder="Ej. 1-3,5,8-9" disabled />
+          <span class="field-hint" id="rangeHint"></span>
+        </div>
+
+        <div class="field">
+          <label for="copiesInput">Número de copias</label>
+          <div class="stepper">
+            <button type="button" class="stepper-btn" id="copiesMinus">−</button>
+            <input type="number" id="copiesInput" value="1" min="1" max="99" />
+            <button type="button" class="stepper-btn" id="copiesPlus">+</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Modo de color</label>
+          <div class="radio-group">
+            <label class="radio-pill">
+              <input type="radio" name="colorMode" value="bw" checked />
+              ⚫ Blanco y Negro
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="colorMode" value="color" />
+              🎨 Color
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Orientación</label>
+          <div class="radio-group">
+            <label class="radio-pill">
+              <input type="radio" name="orientation" value="portrait" checked />
+              📄 Vertical
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="orientation" value="landscape" />
+              📃 Horizontal
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions actions-split">
+        <button class="btn btn-secondary" data-back="1">Atrás</button>
+        <button class="btn btn-primary" id="toStep3Btn">Ver cotización</button>
+      </div>
+    </section>
+
+    <!-- PASO 3: COTIZADOR -->
+    <section class="screen" id="screen-3">
+      <h1>Cotización</h1>
+      <p class="subtitle">Revisa el desglose antes de pagar</p>
+
+      <div class="quote-card">
+        <div class="quote-row">
+          <span>Documento</span>
+          <span id="quoteFileName">—</span>
+        </div>
+        <div class="quote-row">
+          <span>Páginas a imprimir</span>
+          <span id="quotePages">—</span>
+        </div>
+        <div class="quote-row">
+          <span>Copias</span>
+          <span id="quoteCopies">—</span>
+        </div>
+        <div class="quote-row">
+          <span>Modo</span>
+          <span id="quoteColorMode">—</span>
+        </div>
+        <div class="quote-row">
+          <span>Orientación</span>
+          <span id="quoteOrientation">—</span>
+        </div>
+        <div class="quote-row">
+          <span>Precio por página</span>
+          <span id="quotePricePerPage">—</span>
+        </div>
+        <hr />
+        <div class="quote-row quote-total">
+          <span>Total</span>
+          <span id="quoteTotal">$0.00</span>
+        </div>
+      </div>
+
+      <div class="actions actions-split">
+        <button class="btn btn-secondary" data-back="2">Atrás</button>
+        <button class="btn btn-primary" id="toStep4Btn">Continuar al pago</button>
+      </div>
+    </section>
+
+    <!-- PASO 4: PAGO / CONFIRMACIÓN -->
+    <section class="screen" id="screen-4">
+      <h1>Confirmar e imprimir</h1>
+      <p class="subtitle">Verifica tu orden antes de pagar</p>
+
+      <div class="quote-card" id="finalSummary"></div>
+
+      <button class="btn btn-pay" id="payBtn">
+        <span id="payBtnText">💳 Pagar e Imprimir</span>
+      </button>
+
+      <p class="error-message" id="paymentError" hidden></p>
+
+      <div class="actions">
+        <button class="btn btn-secondary" data-back="3">Atrás</button>
+      </div>
+    </section>
+
+    <!-- PANTALLA DE ÉXITO -->
+    <section class="screen" id="screen-success">
+      <div class="success-box">
+        <div class="success-icon">✅</div>
+        <h1>¡Listo!</h1>
+        <p>Tu documento se envió a la impresora.</p>
+        <p class="order-id">Orden: <strong id="orderIdLabel"></strong></p>
+        <p class="subtitle">Recógelo en el mostrador en unos momentos.</p>
+        <button class="btn btn-primary" id="newOrderBtn">Nueva impresión</button>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="loading-overlay" id="loadingOverlay" hidden>
+    <div class="spinner"></div>
+    <p id="loadingText">Procesando…</p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
